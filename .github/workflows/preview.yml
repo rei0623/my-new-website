@@ -1,0 +1,34 @@
+# .github/workflows/preview.yml
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          destination_dir: ./pr/${{ github.event.number }}
+          keep_files: true
+
+      - name: Create PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            🚀 **Preview is ready!**
+            
+            You can view the preview for this PR here:
+            https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr/${{ github.event.number }}/
